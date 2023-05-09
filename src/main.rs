@@ -4,8 +4,9 @@ use std::thread;
 use std::time::Instant;
 
 const NUM_THREADS: usize = 8;
-const BUFFER_SIZE: usize = 100_000_000;
-const NUM_ITERATIONS: usize = 10;
+const BUFFER_SIZE: usize = // 32 MB
+    32 * 1_024 * 1_024 / std::mem::size_of::<f64>();
+const NUM_ITERATIONS: usize = 1_000;
 
 struct ThreadData {
     buffer: Vec<f64>,
