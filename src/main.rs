@@ -13,6 +13,30 @@ struct ThreadData {
     id: usize,
 }
 
+#[cfg(target_arch = "aarch64")]
+use std::arch::aarch64::*;
+
+// ARM NEON SIMD optimized version for aarch64
+#[cfg(target_arch = "aarch64")]
+fn measure_bandwidth(data: ThreadData) {
+    let mut dummy = 0.0;
+    let mut dummy_simd = f64x2::splat(0.0);
+    let mut iter = data.buffer.iter();
+
+    for _ in 0..NUM_ITERATIONS {
+        while let (Some(a), Some(b)) = (iter.next(), iter.next()) {
+            let ab = f64x2::new(*a, *b);
+            dummy_simd = f64x2_add(dummy_simd, ab);
+        }
+    }
+
+    dummy += dummy_simd.extract(0) + dummy_simd.extract(1);
+
+    println!("• Thread {} dummy: {}", data.id, dummy);
+}
+
+// Original version for other architectures
+#[cfg(not(target_arch = "aarch64"))]
 fn measure_bandwidth(data: ThreadData) {
     let mut dummy = 0.0;
     for _ in 0..NUM_ITERATIONS {
